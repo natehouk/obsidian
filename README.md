@@ -2,6 +2,8 @@
 
 **A polyphonic two-oscillator, two-filter synthesizer plugin for macOS, Windows and Linux (VST3 · AU · CLAP · VST2).**
 
+Part of **[Epsilon Audio](https://github.com/natehouk/epsilon-plugins)**, a family of free, open-source plugins: Monolith, Caldera, Obsidian, Strata and Basalt.
+
 ![Obsidian](screenshot.png)
 
 Obsidian is a clean-room design with the feature set of FabFilter Twin, FabFilter's third plugin (December 2005). It was written from scratch, working only from FabFilter's public press release and contemporary reviews. No FabFilter code, binaries, presets, artwork or trademarks were used.
