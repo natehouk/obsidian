@@ -3,7 +3,7 @@
 
 #define DISTRHO_PLUGIN_BRAND   "Epsilon Audio"
 #define DISTRHO_PLUGIN_NAME    "Obsidian"
-#define DISTRHO_PLUGIN_URI     "https://epsilonrecords.com/plugins/obsidian"
+#define DISTRHO_PLUGIN_URI     "https://plugins.epsilonrecords.com/obsidian"
 #define DISTRHO_PLUGIN_CLAP_ID "com.epsilonrecords.obsidian"
 
 #define DISTRHO_PLUGIN_BRAND_ID  EpsA
