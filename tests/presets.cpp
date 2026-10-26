@@ -15,5 +15,5 @@ int main(){ const int SR=48000; int bad=0;
   rend((int)(L.size()-pos));
   double s=0; float pk=0; bool nf=false; for(size_t k=0;k<L.size();++k){ s+=L[k]*L[k]+R[k]*R[k]; pk=std::max(pk,std::max(std::fabs(L[k]),std::fabs(R[k]))); nf|=!std::isfinite(L[k]); }
   float r=std::sqrt(s/(2*L.size())); bool ok=!nf && r>0.01f && pk<=1.f; bad+=!ok;
-  printf("%-16s %-16s rms %.3f peak %.2f %s\n",presets()[i].name,presets()[i].category,r,pk,ok?"":"<-- CHECK"); }
+  printf("%-20s %-16s rms %.3f peak %.2f %s\n",presets()[i].name,presets()[i].category,r,pk,ok?"":"<-- CHECK"); }
  printf("%u presets, %d flagged\n",kNumPresets,bad); return bad; }

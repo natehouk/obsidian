@@ -1,17 +1,17 @@
 # Obsidian
 
-**A polyphonic two-oscillator, two-filter synthesizer plugin for macOS, Windows and Linux (VST3 · AU · CLAP · VST2).**
+**A polyphonic four-oscillator, four-filter synthesizer plugin with effects and an arpeggiator, for macOS, Windows and Linux (VST3 · AU · CLAP · VST2).**
 
 Part of **[Epsilon Audio](https://github.com/natehouk/epsilon-plugins)**, a family of free, open-source plugins: Monolith, Caldera, Obsidian, Strata, Basalt, Gneiss, Mica, Flint, Granite, Magma, Schist, Slate, Talc, Geode and Malachite.
 
 ![Obsidian](screenshot.png)
 
-Obsidian is a clean-room design with the feature set of FabFilter Twin, FabFilter's third plugin (December 2005). It was written from scratch, working only from FabFilter's public press release and contemporary reviews. No FabFilter code, binaries, presets, artwork or trademarks were used.
+Obsidian is a clean-room design with the feature set of FabFilter Twin 3 (2023). Versions 1 and 2 followed the original Twin (2005); version 3 follows Twin 3. It was written from scratch, working only from FabFilter's public product pages, release announcements and contemporary reviews. No FabFilter code, binaries, presets, artwork or trademarks were used.
 
 It is the third instrument in a family:
 - [Monolith](https://github.com/natehouk/monolith), a synth
 - [Caldera](https://github.com/natehouk/caldera), a filter effect
-- **Obsidian**, which shares their filter design. Monolith's filter is one of its four styles.
+- **Obsidian**, which shares Caldera's filter styles (Monolith's filter is one of them) and the Epsilon modulation system (XLFOs, envelopes, followers, XY pads) with Caldera, Strata and Magma.
 
 ## Download
 
@@ -39,70 +39,38 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/*/Obsidian*
 
 ## Features
 
-**Oscillators (2)**
-- **Triangle, saw or square**, band-limited with PolyBLEP.
-- **Pulse width** for the square wave.
-- **Octave** (±3), **semitone** (±12), **fine** (±100 cents).
-- **Level** and stereo **pan**.
-- **Phase sync**: each note starts the oscillator at the same point, which helps punchy basses. When it's off, each note starts at a random point.
-- **Hard sync**: oscillator 2 restarts every cycle of oscillator 1.
+**Oscillators (4)**
+- **Triangle, saw, square, sine, white noise or pink noise**; the tones are band-limited.
+- **Octave** (±3), **semitone** (±12), **fine** (±100 cents), **level**, stereo **pan**, **pulse width**.
+- **Sync** knob: a hard-sync ratio from ×1 to ×16 against a hidden master at the note's pitch, so any oscillator can do sync sweeps on its own. Obsidian 2's osc 1 → osc 2 hard sync is still there.
+- **Phase sync** per oscillator, **ring modulation** between 1–2 and 3–4, analog **drift**, master **tune** and **transpose**.
 
-**Filters (2)**
-- Each filter can be switched on or off independently.
-- **Four styles:**
+**Filters (4)**
+- **Eleven styles:** Smooth, Hot, Raw and Monolith from Obsidian 2, plus Clean, Warm, Acid, Tube, Gentle, Metal and Hollow.
+- **Low / band / high pass, bell, low and high shelf, notch**, at **6, 12, 24 or 48 dB/oct**, with **freq**, **peak**, **gain** and stereo **pan**.
+- **Routing:** serial, parallel or **per oscillator** (oscillator *n* into filter *n*).
+- **Freq and peak offsets** that move all four filters at once.
+- An interactive display: drag handles for frequency and peak/gain, double-click to add a filter, right-click to remove one.
+- **HQ mode:** 4× oversampled voices for alias-free screaming filters and sync (about 0.5 ms latency, reported to the host).
 
-  | Style | Character |
-  |---|---|
-  | **Smooth** | Moderate overdrive, broad resonance |
-  | **Hot** | Saturating, screaming peak |
-  | **Raw** | Buzzy, self-oscillating |
-  | **Monolith** | The Monolith synth's filter, self-oscillating |
+**Effects:** reverb (0.2–20 s, brightness, predelay), delay (free or synced, stereo offset, feedback, ping-pong, low and high cut), chorus (single or double), phaser / flanger, drive (pre or post) and a compressor (threshold, ratio, attack, release, auto gain, parallel amount).
 
-- **Low / band / high pass** at **12 or 24 dB/oct**.
-- **Freq**, **Peak** (resonance) and stereo **Pan**: pan offsets the cutoff between the left and right channels.
-- **Routing:**
-  - **Serial**: both oscillators feed filter 1, then filter 2.
-  - **Parallel**: both oscillators feed both filters, and their outputs are summed.
-  - **Split**: oscillator 1 feeds filter 1, and oscillator 2 feeds filter 2.
-
-**Envelopes (3)**
-- **Env 1** and **Env 2** are for modulation: **delay**, attack, decay, sustain, release, and an **invert** switch.
-- **Amp Env** controls each voice's volume. It has a **hold** stage, which keeps the note at full level after the attack, before the decay starts. Its **Velocity** knob sets how much velocity affects volume.
-- Every envelope parameter can be a modulation destination.
-
-**LFOs (3)**
-- Waves: **triangle, sine, square, random** (smoothly gliding between random values) and **sample & hold**.
-- **Balance** skews triangle and sine from a falling ramp to a rising ramp. For square, it sets the duty cycle.
-- **Free** (0.01–50 Hz) or synced to host tempo and song position: **straight, dotted or triplet**, 16 bars to 1/64.
-- **Note sync** restarts the LFO for each note, giving every voice its own LFO.
-- Rate and balance can both be modulation destinations.
-
-**Modulation: 24 slots, drag and drop**
-- Drag a **source chip** onto any knob. A slot is created with a sensible starting amount, and the knob gets a coloured ring showing it's modulated.
-  - The chips for LFO 1–3, Env 1–2 and Amp Env sit on their own panels.
-  - The chips for **Velocity, Aftertouch** (channel or polyphonic), **Key Track, Pitch Bend** and **Mod Wheel** sit on the Modulation panel.
-- Each slot has:
-  - a source picker
-  - a destination picker
-  - a bipolar **amount** knob (turn it left to invert)
-  - a **bypass** switch
-  - a delete button
-- Every slot's amount is itself a destination, so a slot can control how much another slot modulates. In the Init preset, the mod wheel brings in vibrato this way.
-- Destinations:
-  - oscillator pitch, PW, level and pan
-  - filter freq, peak and pan
-  - every envelope stage
-  - LFO rate and balance
-  - volume, unison detune, and every slot's amount
-- Freq modulation reaches ±5 octaves, and pitch modulation ±24 semitones. With **Key Track → Filter Freq** at 20%, the filter tracks the keyboard 1:1.
-
-![Destination picker](screenshot-modulation.png)
+**Arpeggiator:** up, down, up/down, as played or random; up to 3 extra octaves; free rate (0.25–20 Hz) or synced with a ×0.5–×2 offset; groove; legato (note length); latch off / held / full; retrigger; and **lock**, which keeps the arpeggiator when you change presets.
 
 **Voices**
-- **Voices** (1–24): at 1, the synth plays monophonically with last-note priority.
-- **Unison** (1–4 voices per note) with **detune** and stereo **spread**. The total is capped at 24 voices; the oldest note is retired first, released notes before held ones.
-- **Glide** works in mono and poly. **Always** glides on every note. **Legato** glides only when notes overlap, and in mono it doesn't retrigger the envelopes.
+- Up to **64 voices**, **unison** up to 8 with detune and stereo spread.
+- **Glide** in mono and poly, always or legato.
+- **Per oscillator** voice mode: each new note goes to the next oscillator, so chords are spread across them.
 - Pitch-bend range up to ±24 st, sustain pedal (CC64), all-notes-off and all-sound-off.
+
+**Modulation: drag and drop, up to 100 slots**
+- **Sources:** 4 **XLFOs** (seven waves or a 16-step sequencer with glide; free or synced; per note or shared), 2 **envelope generators** with draggable curve handles and legato triggering, 2 **envelope followers** (per voice or whole synth, with a transient mode), 2 **XY pads**, and **velocity, key, mod wheel, pitch bend and aftertouch**. Obsidian 2's three LFOs, two envelopes and the amp envelope remain as classic sources with their 24 slots.
+- Drag a **source chip** onto any knob: the knob gets a coloured ring showing the range and a live dot showing the modulation. Right-click a knob to list and edit what modulates it.
+- Every slot has source, destination, a bipolar amount, bypass and delete; every slot amount is itself a destination.
+- **Destinations** include every oscillator and filter parameter, tune, glide, unison spread, the effects, the arpeggiator rate, the XLFOs, the EGs and every slot amount.
+- **Source presets:** load or save a single XLFO, EG or EF.
+
+![Modulation](screenshot-modulation.png)
 
 **Workflow**
 - **A/B** with copy, and **undo/redo** for every edit, including new modulation, preset loads and A/B switches.
@@ -114,35 +82,39 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/*/Obsidian*
 
   Assignments are saved with your project.
 - **MIDI** switch: turns all MIDI handling off.
-- **42 factory presets** in six categories: Bass, Lead, Pad, Keys & Plucks, Brass & Strings, FX & Motion.
+- **60 factory presets** in eight categories: Bass, Lead, Pad, Keys & Plucks, Brass & Strings, FX & Motion, Arp & Sequence and Texture.
 - **Save your own presets** as small text files, which load the same on every OS:
   - macOS: `~/Library/Audio/Presets/Epsilon Audio/Obsidian/`
   - Windows: `%APPDATA%\Epsilon Audio\Obsidian\Presets\`
   - Linux: `~/.config/epsilon-audio/obsidian/presets/`
 - To delete a user preset, right-click it in the menu, then click it again to confirm.
-- **Resizable** window, double-click to **type a value**, **Cmd/Ctrl-click** to reset a control, grab the rim of a large knob to turn it in a circle, and hover a control to see its name and value, then a tip.
+- **Resizable** window, double-click to **type a value**, **Cmd/Ctrl-click** to reset a control, grab the rim of a large knob to turn it in a circle.
+- **Compatible:** sessions and presets from Obsidian 1.x and 2.x load unchanged and sound identical.
 
 ![Presets](screenshot-presets.png)
 
 ![Help](screenshot-help.png)
 
-### Compared with FabFilter Twin (2005)
+### Compared with FabFilter Twin 3
 
-| Twin | Obsidian |
+| Twin 3 | Obsidian 3.0 |
 |---|---|
-| 2 oscillators: triangle / saw / square, PW, hard sync, phase sync, pan | ✓ |
-| 2 multimode filters, LP/HP/BP, 12/24 dB, 3 characters + One's filter, per-filter pan | ✓ (Smooth, Hot, Raw + Monolith's filter) |
-| Several oscillator → filter routings | ✓ serial, parallel, split |
-| 3 envelopes with delay / hold, invertible, all parameters modulatable | ✓ |
-| 3 LFOs: triangle, sine, square, random triangle, S&H; sync straight/dotted/triplet; note sync; balance | ✓ |
-| 24 drag-and-drop modulation slots, invertible, bypassable, slot levels modulatable | ✓ |
-| Sources: LFOs, envelopes, velocity, aftertouch, key track, pitch bend, mod wheel | ✓ |
-| 24 voices with unison, polyphonic portamento | ✓ |
-| MIDI Learn | ✓ |
-| Undo/redo, A/B (later FabFilter versions) | ✓ |
-| Help with interactive hints (later FabFilter versions) | ✓ hover tips, help pages and full manual |
-| 500+ factory presets | 42, plus saving your own |
-| Pro Tools (RTAS/AAX) | Not supported (needs Avid's SDK and signing) |
+| 4 oscillators: saw, square, triangle, sine, noise; pure variants | ✓ triangle, saw, square, sine, white and pink noise, band-limited |
+| Detune, scale, sync knob, phase sync, level/pan per oscillator | ✓ octave/semitone/fine, sync ratio ×1–×16, phase sync, level, pan, PW |
+| Ring modulation, analog drift | ✓ ring 1×2 and 3×4, drift |
+| Master tune, portamento | ✓ tune, transpose, glide (always or legato) |
+| 4 filters, 11 styles; LP/BP/HP/bell/shelves/notch; 6–48 dB; frequency pan | ✓ eleven original styles, all shapes and slopes, gain, pan |
+| Serial, parallel and per-oscillator filter routing; freq/peak offsets | ✓ |
+| HQ (oversampling) mode | ✓ 4× |
+| Reverb, delay, chorus, phaser/flanger, drive, compressor | ✓ |
+| Arpeggiator: order, octaves, rate/sync, groove, legato, latch, retrigger, lock | ✓ |
+| Up to 64 voices, unison, per-oscillator voice mode | ✓ |
+| XLFOs (step sequencer), EGs with curves, EFs, XY controllers, MIDI sources | ✓ 4 XLFOs, 2 EGs, 2 EFs (with transient mode), 2 XY pads, MIDI |
+| Drag-and-drop modulation with visual feedback, up to 100 slots | ✓ 100 slots plus Obsidian 2's 24, live rings, per-knob slot list |
+| MIDI Learn, undo/redo, A/B, help and interactive hints | ✓ |
+| Factory presets; loads earlier presets | 60, plus your own; loads Obsidian 1.x and 2.x projects and presets, sounding identical |
+| Resizable interface, full-screen mode | Freely resizable interface |
+| AAX, AudioSuite | Not supported (needs Avid's SDK and signing) |
 
 ## Build from source
 
@@ -160,35 +132,56 @@ GitHub Actions builds all three platforms on every push. The macOS build is univ
 
 ```
 cd tests
-g++ -O2 -std=c++11 features.cpp -o features && ./features   # voices/unison/stealing, mono, hard & phase sync, routing, slots, slot-on-slot, delay, hold, S&H, filter styles, glide
-g++ -O2 -std=c++11 fuzz.cpp -o fuzz && ./fuzz               # random params/MIDI/transport at 44.1–192 kHz: finite, <= 0 dBFS
-g++ -O2 -std=c++11 presets.cpp -o presets && ./presets      # plays every factory preset
-g++ -O3 -std=c++11 bench.cpp -o bench && ./bench            # CPU: 24 voices, both 24 dB filters, all LFOs
+for t in features features3 compat fuzz presets modpresets; do g++ -O2 -std=c++17 -I../plugins/Obsidian $t.cpp -o $t && ./$t; done
+g++ -O3 -ffast-math -std=c++17 -I../plugins/Obsidian bench.cpp -o bench && ./bench
 ```
 
-At full load (24 voices, both filters at 24 dB, three LFOs and several slots running), Obsidian uses about 20% of one CPU core. Normal playing uses much less.
+- `features`: voices, unison and stealing, mono, hard and phase sync, routing, slots, slot-on-slot, delay, hold, S&H, filter styles, glide (the 2.x behaviour)
+- `features3`: the 3.0 features: four oscillators, noise, ring, sync ratio, tune, drift, 64 voices, unison 8, per-oscillator mode, four filters, slopes, shapes, offsets, per-oscillator routing, styles, HQ aliasing, every effect, the arpeggiator and latch, XLFOs, EG curves, XY, followers, global destinations, 100 slots
+- `compat`: plays random 2.x sounds and MIDI through the 3.0 engine and a frozen copy of the 2.0 engine (`tests/legacy/`); the outputs must match to better than -120 dB (they are identical)
+- `fuzz`: random parameters, MIDI and transport at 44.1-192 kHz: finite output, at most 0 dBFS
+- `presets`: plays every factory preset and checks its level
+- `modpresets`: the source presets and their files
+- `bench`: CPU
+
+CPU at 48 kHz on one modern x86 core, all voices sounding:
+
+| Load | CPU |
+|---|---|
+| 2.x: 24 voices, 2 oscillators, both 24 dB filters, 8 slots | 20% |
+| 3.0: 16 voices, 4 oscillators, 4 filters, 20 slots, every effect | 29% |
+| The same with HQ (4× oversampling) | 79% |
+| 3.0: 64 voices, 4 oscillators, 4 filters, 20 slots, every effect | 104% |
+
+Normal playing uses much less: only sounding voices, and only the oscillators and filters that are on, cost CPU.
 
 Release checks:
 - Steinberg's VST3 validator passes 47/47.
-- The interface is exercised with scripted input, including drag-and-drop modulation, the slot pickers, MIDI Learn, presets, A/B, undo and redo, hover tips and help.
+- The interface is exercised with scripted input and MIDI, including drag-and-drop modulation, the filter handles, the step and curve editors, the slot pickers, the source tabs, the effects, the arpeggiator, MIDI Learn, presets, A/B, undo and redo, hover tips and help.
 
 ## Source layout
 
 | File | Contents |
 |---|---|
-| `plugins/Obsidian/ObsidianEngine.hpp` | All DSP: voices, oscillators, filters, envelopes, LFOs, modulation matrix. Header-only |
+| `plugins/Obsidian/ObsidianEngine.hpp` | All DSP: voices, oscillators, filters, envelopes, LFOs, modulation, the 2.x render path and the 3.0 render path. Header-only |
+| `plugins/Obsidian/SynthFx.hpp` | Reverb, delay, chorus, phaser/flanger, drive and compressor |
+| `plugins/Obsidian/Arp.hpp` | Arpeggiator |
 | `plugins/Obsidian/ParamDefs.hpp` | Parameter table, labels, modulation source and destination names, value mapping |
 | `plugins/Obsidian/Presets.hpp` | Factory presets |
 | `plugins/Obsidian/UserPresets.hpp` | User preset files |
+| `plugins/Obsidian/ComponentPresets.hpp` | Factory and user presets for single modulation sources |
+| `plugins/Obsidian/common/` | Shared Epsilon Audio code (modulation system v2, oversampling), vendored from epsilon-common |
 | `plugins/Obsidian/Help.hpp` | Hover tip text and in-plugin help pages |
-| `plugins/Obsidian/ObsidianPlugin.cpp` | Plugin wrapper: parameters, programs, MIDI, MIDI Learn, transport |
+| `plugins/Obsidian/ObsidianPlugin.hpp/.cpp` | Plugin wrapper: parameters, programs, MIDI, MIDI Learn, transport, latency |
 | `plugins/Obsidian/ObsidianUI.cpp` | Custom vector interface (NanoVG) |
 | `docs/MANUAL.md` | User manual (`Obsidian-Manual.html` is generated from it with pandoc) |
+| `tests/legacy/` | Frozen copy of the 2.0 engine, for the compatibility test |
 
 New parameters are only ever appended, so saved sessions and automation keep working across versions.
 
 ## Changelog
 
+- **3.0:** Four oscillators with sine, white and pink noise, a sync-ratio knob, ring modulation, drift, master tune and transpose; four filters with seven new styles, bell, shelf and notch shapes, 6 and 48 dB slopes, gain, per-oscillator routing, freq/peak offsets and an interactive display; 4× HQ mode; reverb, delay, chorus, phaser/flanger, drive and compressor; an arpeggiator; up to 64 voices, unison 8 and a per-oscillator voice mode; the Epsilon modulation system (4 XLFOs with step sequencers, 2 curved envelopes, 2 followers, 2 XY pads, MIDI sources, 100 slots, per-source presets); a new interface; 18 new factory presets. Sessions and presets from 1.x and 2.x load unchanged and sound identical.
 - **2.0:** A/B with copy, undo/redo, hover tips, a help window and a full manual (in every release zip), rim-grab turning on the large knobs. Sessions and automation from 1.x load unchanged.
 - **1.0:** First release.
 
