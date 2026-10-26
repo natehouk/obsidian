@@ -49,6 +49,7 @@ static constexpr float W = 1240.f, H = 866.f;
 #define C_FAINT     Color(0x4a, 0x4e, 0x54)
 #define C_ACC       Color(0xb4, 0x9c, 0xff)       // obsidian violet
 #define C_DISPLAY   Color(0x0b, 0x0c, 0x0d)
+#define C_FAV       Color(0xff, 0xc8, 0x5a)
 
 static Color withAlpha(const Color& c, float a) { Color r(c); r.alpha = a; return r; }
 static Color oscColor(int o) { static const Color c[kNumOsc] = { Color(0xb4, 0x9c, 0xff), Color(0x5f, 0xd0, 0xc0), Color(0xff, 0xa8, 0x3e), Color(0xe0, 0x8c, 0xd8) }; return c[o & 3]; }
@@ -99,6 +100,7 @@ static constexpr float XY_X = MX + 20, XY_Y = MY + 44, XY_W = 300, XY_H = 236;
 static constexpr float COMP_W = 110, COMP_H = 20, COMP_X = MX + MW - 14 - COMP_W, COMP_Y = MY + 78;
 static constexpr float EGD_X = MX + 16, EGD_Y = MY + 206, EGD_W = 420, EGD_H = 84;          // EG display with curve handles
 static constexpr float CL_COLW = 188;
+static constexpr float ARPP_X = PX + 112, ARPP_Y = PY + 8, ARPP_W = 72, ARPP_H = 20;
 static constexpr float ARPV_X = PX + 14, ARPV_Y = PY + 240, ARPV_W = PW - 28, ARPV_H = 56;
 
 enum WType { Knob, Toggle, Segment, Stepper };
@@ -270,7 +272,7 @@ static constexpr float PS_X = 484.f, PS_Y = 18.f, PS_W = 260.f, PS_H = 28.f, PS_
 static constexpr float A_X = 756.f, AB_W = 30.f, COPY_X = 818.f, COPY_W = 46.f;
 static constexpr float UNDO_X = 874.f, REDO_X = 926.f, UR_W = 48.f;
 static constexpr float LEARN_X = 984.f, LEARN_W = 70.f, MIDI_X = 1060.f, MIDI_W = 50.f, HELP_X = 1116.f, HELP_W = 50.f;
-static constexpr float PM_COLW = 134.f, PM_ROW = 22.f, PM_HEAD = 22.f, PM_PAD = 8.f;
+static constexpr float PM_COLW = 121.f, PM_ROW = 22.f, PM_HEAD = 22.f, PM_PAD = 8.f;
 
 // a filter's response (linear prototype of the engine's filters)
 static cplx filterH(const float* v, int f, float hz) {
@@ -724,6 +726,7 @@ protected:
     // ---- arpeggiator ---------------------------------------------------------------
     void drawArpPanel() {
         panel(PX, PY, PW, PH, "ARPEGGIATOR");
+        drawDropButton(ARPP_X, ARPP_Y, ARPP_W, ARPP_H, "PRESETS", hoverArpComp || (popup.open && popup.kind == 3 && compArp));
         caption(PX + 74, PY + 88, "OCTAVES"); caption(PX + PW - 74, PY + 88, "LATCH"); caption(PX + PW / 2, PY + 42, "ORDER");
         displayBox(ARPV_X, ARPV_Y, ARPV_W, ARPV_H);
         int notes[32]; int n = 0;
@@ -783,7 +786,7 @@ protected:
         else if (tab == kTabClassicL) drawClassicL();
         else drawClassicE();
         for (const Chip& c : chips()) drawChip(c.src, c.x, c.y, hoverChip == c.src, false);
-        if (tab <= 7) drawDropButton(COMP_X, COMP_Y, COMP_W, COMP_H, tab <= 3 ? "LFO PRESETS" : (tab <= 5 ? "EG PRESETS" : "EF PRESETS"), hoverComp || (popup.open && popup.kind == 3));
+        if (tab <= 7) drawDropButton(COMP_X, COMP_Y, COMP_W, COMP_H, tab <= 3 ? "LFO PRESETS" : (tab <= 5 ? "EG PRESETS" : "EF PRESETS"), hoverComp || (popup.open && popup.kind == 3 && !compArp));
     }
     void drawChip(int src, float x, float y, bool hot, bool dragging) {
         const Color col = srcColor(src);
@@ -903,27 +906,29 @@ protected:
     }
 
     // ---- per-source presets -------------------------------------------------------------
-    int compKind() const { return tab <= 3 ? kCompXlfo : (tab <= 5 ? kCompEg : kCompEf); }
-    int compIndex() const { return tab <= 3 ? tab : (tab <= 5 ? tab - 4 : tab - 6); }
+    bool compArp = false;      // the open menu is the arpeggiator's
+    int compKind() const { return compArp ? kCompArp : (tab <= 3 ? kCompXlfo : (tab <= 5 ? kCompEg : kCompEf)); }
+    int compIndex() const { return compArp ? 0 : (tab <= 3 ? tab : (tab <= 5 ? tab - 4 : tab - 6)); }
     bool compHit(float x, float y) const { return tab <= 7 && inRect(x, y, COMP_X, COMP_Y, COMP_W, COMP_H); }
+    bool arpCompHit(float x, float y) const { return inRect(x, y, ARPP_X, ARPP_Y, ARPP_W, ARPP_H); }
     struct CompItem { int type, idx; std::string name; };       // type 0 factory, 1 user file, 2 save
     std::vector<CompItem> compItems; int compPendingDel = -1;
     bool savingComp = false; int savingCompKind = 0, savingCompIdx = 0;
-    void openCompMenu() {
-        compItems.clear(); const int k = compKind();
+    void openCompMenu(bool arp) {
+        compArp = arp; compItems.clear(); const int k = compKind();
         for (int i : compFactoryFor(k)) compItems.push_back({ 0, i, compFactory()[i].name });
         const std::vector<std::string> u = listCompPresets(k); for (int i = 0; i < (int)u.size(); ++i) compItems.push_back({ 1, i, u[i] });
         compItems.push_back({ 2, 0, "Save current..." });
-        compPendingDel = -1; popup.open = true; popup.kind = 3; popup.slot = -1; popup.x = COMP_X + COMP_W - 186; popup.y = COMP_Y + COMP_H + 4;
-        const float ph = compItems.size() * 20.f + 12; if (popup.y + ph > H - 8) popup.y = COMP_Y - ph - 4;
+        compPendingDel = -1; popup.open = true; popup.kind = 3; popup.slot = -1; popup.x = arp ? ARPP_X + ARPP_W - 186 : COMP_X + COMP_W - 186; popup.y = arp ? ARPP_Y + ARPP_H + 4 : COMP_Y + COMP_H + 4;
+        const float ph = compItems.size() * 20.f + 12; if (popup.y + ph > H - 8) popup.y = (arp ? ARPP_Y : COMP_Y) - ph - 4;
         popup.hover = -1; repaint();
     }
     void applyComp(const float* fields) { const int k = compKind(), ix = compIndex(); beginGesture(); for (int f = 0; f < compFieldCount(k); ++f) commit(compParam(k, ix, f), fields[f]); endGesture(); }
     void pickComp(int i) {
-        const CompItem it = compItems[i]; const int k = compKind(); float fv[em::kXlfoFields];
+        const CompItem it = compItems[i]; const int k = compKind(); float fv[em::kXlfoFields + kArpCompFields];
         if (it.type == 0) { compFactoryValues(it.idx, fv); applyComp(fv); flash(std::string(compKindName(k)) + " preset: " + it.name); }
         else if (it.type == 1) {
-            if (compPendingDel == i) { deleteCompPreset(k, it.name); openCompMenu(); return; }
+            if (compPendingDel == i) { deleteCompPreset(k, it.name); openCompMenu(compArp); return; }
             if (loadCompPreset(k, it.name, fv)) { applyComp(fv); flash(std::string(compKindName(k)) + " preset: " + it.name); }
         } else { savingComp = true; savingCompKind = k; savingCompIdx = compIndex(); saving = true; saveError = false; saveName.clear(); }
         popup.open = false; repaint();
@@ -1299,35 +1304,70 @@ protected:
         const float cx = x + w - a - 14, cy = y + h / 2;
         beginPath(); moveTo(cx - 4, cy - 2); lineTo(cx + 4, cy - 2); lineTo(cx, cy + 3); closePath(); fillColor(C_DIM); fill();
     }
+    // preset browser: categories, user presets and favourites in columns; typing searches names and categories.
+    // kind: 0 factory, 1 user, 2 save button, 3 search field, 4 favourite (idx into favs)
     struct MRect { float x, y, w, h; int kind; int idx; };
+    static std::string lower(const std::string& s) { std::string r(s); for (char& c : r) c = (char)std::tolower((unsigned char)c); return r; }
+    std::string favKey(int kind, int idx) const { return kind == 0 ? std::string("f:") + presets()[idx].name : (kind == 1 ? "u:" + userPresets[idx] : (idx < (int)favs.size() ? favs[idx] : std::string())); }
+    bool isFav(const std::string& k) const { return std::find(favs.begin(), favs.end(), k) != favs.end(); }
+    void toggleFav(const std::string& k) {
+        if (k.empty()) return;
+        auto it = std::find(favs.begin(), favs.end(), k); if (it != favs.end()) favs.erase(it); else favs.push_back(k);
+        saveFavourites(favs); repaint();
+    }
+    static constexpr int kMenuCols = kNumCategories + 2, kMenuRows = 16;
     void menuLayout(float& mx, float& my, float& mw, float& mh, std::vector<MRect>& items) const {
-        const int cols = kNumCategories + 1;
-        mw = PM_COLW * cols + 2 * PM_PAD; mx = std::min(W - mw - 8, std::max(8.f, PS_X + PS_W / 2 - mw / 2)); my = PS_Y + PS_H + 4;
+        mw = PM_COLW * kMenuCols + 2 * PM_PAD; mx = std::min(W - mw - 8, std::max(8.f, PS_X + PS_W / 2 - mw / 2)); my = PS_Y + PS_H + 4;
         items.clear();
         const float top = my + PM_PAD + PM_ROW + 6 + PM_HEAD;
-        int rows[kNumCategories + 1] = {}; int maxRows = 1;
-        for (uint32_t i = 0; i < kNumPresets; ++i) {
-            const char* cat = presets()[i].category;
-            if (std::strcmp(cat, "Init") == 0) { items.push_back({ mx + PM_PAD, my + PM_PAD, PM_COLW - 4, PM_ROW, 0, (int)i }); continue; }
-            for (int c = 0; c < kNumCategories; ++c)
-                if (std::strcmp(cat, kCategories[c]) == 0) { items.push_back({ mx + PM_PAD + c * PM_COLW, top + rows[c] * PM_ROW, PM_COLW - 4, PM_ROW, 0, (int)i }); maxRows = std::max(maxRows, ++rows[c]); }
-        }
-        for (int u = 0; u < (int)userPresets.size() && u < 18; ++u) items.push_back({ mx + PM_PAD + kNumCategories * PM_COLW, top + u * PM_ROW, PM_COLW - 4, PM_ROW, 1, u });
-        maxRows = std::max(maxRows, std::min(18, (int)userPresets.size()));
+        int maxRows = 1;
+        items.push_back({ mx + PM_PAD + PM_COLW, my + PM_PAD, 300, PM_ROW, 3, 0 });
         items.push_back({ mx + mw - PM_PAD - 150, my + PM_PAD, 150, PM_ROW, 2, 0 });
+        if (!query.empty()) {
+            const std::string q = lower(query); int k = 0;
+            auto place = [&](int kind, int idx) { const int col = k / kMenuRows, row = k % kMenuRows; if (col >= kMenuCols) return; items.push_back({ mx + PM_PAD + col * PM_COLW, top + row * PM_ROW, PM_COLW - 4, PM_ROW, kind, idx }); maxRows = std::max(maxRows, row + 1); ++k; };
+            for (uint32_t i = 0; i < kNumPresets; ++i) if (lower(presets()[i].name).find(q) != std::string::npos || lower(presets()[i].category).find(q) != std::string::npos) place(0, (int)i);
+            for (int u = 0; u < (int)userPresets.size(); ++u) if (lower(userPresets[u]).find(q) != std::string::npos || std::string("user").find(q) != std::string::npos) place(1, u);
+        } else {
+            int rows[kNumCategories] = {};
+            for (uint32_t i = 0; i < kNumPresets; ++i) {
+                const char* cat = presets()[i].category;
+                if (std::strcmp(cat, "Init") == 0) { items.push_back({ mx + PM_PAD, my + PM_PAD, PM_COLW - 4, PM_ROW, 0, (int)i }); continue; }
+                for (int c = 0; c < kNumCategories; ++c)
+                    if (std::strcmp(cat, kCategories[c]) == 0) { items.push_back({ mx + PM_PAD + c * PM_COLW, top + rows[c] * PM_ROW, PM_COLW - 4, PM_ROW, 0, (int)i }); maxRows = std::max(maxRows, ++rows[c]); }
+            }
+            for (int u = 0; u < (int)userPresets.size() && u < kMenuRows; ++u) items.push_back({ mx + PM_PAD + kNumCategories * PM_COLW, top + u * PM_ROW, PM_COLW - 4, PM_ROW, 1, u });
+            maxRows = std::max(maxRows, std::min(kMenuRows, (int)userPresets.size()));
+            for (int f = 0; f < (int)favs.size() && f < kMenuRows; ++f) items.push_back({ mx + PM_PAD + (kNumCategories + 1) * PM_COLW, top + f * PM_ROW, PM_COLW - 4, PM_ROW, 4, f });
+            maxRows = std::max(maxRows, std::min(kMenuRows, (int)favs.size()));
+        }
         mh = PM_PAD + PM_ROW + 6 + PM_HEAD + maxRows * PM_ROW + PM_PAD;
+    }
+    std::string itemLabel(const MRect& r) const {
+        if (r.kind == 0) return presets()[r.idx].name;
+        if (r.kind == 1) return userPresets[r.idx];
+        if (r.kind == 4 && r.idx < (int)favs.size()) return favs[r.idx].substr(2);
+        return "";
     }
     void drawPresetMenu() {
         float mx, my, mw, mh; std::vector<MRect> items; menuLayout(mx, my, mw, mh, items);
         beginPath(); rect(mx - 12, my - 4, mw + 24, mh + 20); fillPaint(boxGradient(mx, my + 2, mw, mh, 6, 14, Color(0, 0, 0, 0.6f), Color(0, 0, 0, 0.f))); fill();
         beginPath(); roundedRect(mx, my, mw, mh, 6); fillColor(C_PANEL_HI); fill(); strokeColor(C_LINE); strokeWidth(1); stroke();
         beginPath(); moveTo(mx + PM_PAD, my + PM_PAD + PM_ROW + 3); lineTo(mx + mw - PM_PAD, my + PM_PAD + PM_ROW + 3); strokeColor(C_LINE); stroke();
-        fontSize(8); textLetterSpacing(1.6f); textAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-        for (int c = 0; c <= kNumCategories; ++c) {
-            std::string up = c < kNumCategories ? kCategories[c] : "User"; for (char& ch : up) ch = (char)std::toupper((unsigned char)ch);
-            fillColor(c < kNumCategories ? C_ACC : Color(0x5f, 0xd0, 0xc0)); text(mx + PM_PAD + c * PM_COLW + 12, my + PM_PAD + PM_ROW + 6 + PM_HEAD / 2, up.c_str(), nullptr);
+        fontSize(8.5f); textLetterSpacing(1.8f); textAlign(ALIGN_LEFT | ALIGN_MIDDLE);
+        const float hy = my + PM_PAD + PM_ROW + 6 + PM_HEAD / 2;
+        if (query.empty()) {
+            for (int c = 0; c < kMenuCols; ++c) {
+                std::string up = c < kNumCategories ? kCategories[c] : (c == kNumCategories ? "User" : "Favourites"); for (char& ch : up) ch = (char)std::toupper((unsigned char)ch);
+                fillColor(c < kNumCategories ? C_ACC : C_FAV); text(mx + PM_PAD + c * PM_COLW + 12, hy, up.c_str(), nullptr);
+            }
+            fontSize(10); textLetterSpacing(0.4f); fillColor(C_FAINT);
+            if (userPresets.empty()) text(mx + PM_PAD + kNumCategories * PM_COLW + 12, hy + PM_HEAD / 2 + PM_ROW / 2, "(none saved yet)", nullptr);
+            if (favs.empty()) text(mx + PM_PAD + (kNumCategories + 1) * PM_COLW + 12, hy + PM_HEAD / 2 + PM_ROW / 2, "(click a star)", nullptr);
+        } else {
+            int found = 0; for (const MRect& r : items) if (r.kind == 0 || r.kind == 1) ++found;
+            char b[64]; snprintf(b, sizeof b, found ? "%d MATCHING PRESET%s" : "NO PRESET MATCHES", found, found == 1 ? "" : "S"); fillColor(C_ACC); text(mx + PM_PAD + 12, hy, b, nullptr);
         }
-        if (userPresets.empty()) { fontSize(10); textLetterSpacing(0.4f); fillColor(C_FAINT); text(mx + PM_PAD + kNumCategories * PM_COLW + 12, my + PM_PAD + PM_ROW + 6 + PM_HEAD + PM_ROW / 2, "(none yet)", nullptr); }
         for (int i = 0; i < (int)items.size(); ++i) {
             const MRect& r = items[i]; const bool hot = i == menuHover;
             if (r.kind == 2) {
@@ -1335,24 +1375,48 @@ protected:
                 fontSize(9.5f); textLetterSpacing(1.6f); textAlign(ALIGN_CENTER | ALIGN_MIDDLE); fillColor(C_TEXT); text(r.x + r.w / 2, r.y + r.h / 2 + 0.5f, "SAVE CURRENT AS...", nullptr);
                 continue;
             }
-            const bool isCur = r.kind == 0 ? (curUser.empty() && r.idx == curFactory) : (curUser == userPresets[r.idx]);
+            if (r.kind == 3) {             // search field
+                beginPath(); roundedRect(r.x, r.y + 1, r.w, r.h - 2, 4); fillColor(C_DISPLAY); fill(); strokeColor(query.empty() ? C_LINE : C_ACC); strokeWidth(1); stroke();
+                beginPath(); circle(r.x + 12, r.y + r.h / 2, 4); moveTo(r.x + 15, r.y + r.h / 2 + 3); lineTo(r.x + 18, r.y + r.h / 2 + 6); strokeColor(C_DIM); strokeWidth(1.3f); stroke();
+                fontSize(11); textLetterSpacing(0.3f); textAlign(ALIGN_LEFT | ALIGN_MIDDLE); fillColor(query.empty() ? C_FAINT : C_TEXT);
+                text(r.x + 26, r.y + r.h / 2 + 0.5f, query.empty() ? "Type to search names and categories" : (query + "|").c_str(), nullptr);
+                continue;
+            }
+            const std::string key = favKey(r.kind, r.idx);
+            const bool isCur = r.kind == 0 ? (curUser.empty() && r.idx == curFactory) : (r.kind == 1 ? curUser == userPresets[r.idx] : false);
             const bool del = r.kind == 1 && pendingDelete == r.idx;
-            if (hot || del) { beginPath(); roundedRect(r.x, r.y, r.w, r.h, 4); fillColor(del ? Color(0xd0, 0x50, 0x40, 0.35f) : withAlpha(C_ACC, 0.2f)); fill(); }
+            if (hot || del) { beginPath(); roundedRect(r.x, r.y, r.w, r.h, 4); fillColor(del ? Color(0xd0, 0x50, 0x40, 0.35f) : withAlpha(C_ACC, 0.18f)); fill(); }
             if (isCur) { beginPath(); circle(r.x + 6, r.y + r.h / 2, 2.5f); fillColor(C_ACC); fill(); }
-            fontSize(10); textLetterSpacing(0.3f); textAlign(ALIGN_LEFT | ALIGN_MIDDLE); fillColor(hot || isCur || del ? C_TEXT : C_DIM);
-            const std::string label = del ? "Delete? click again" : (r.kind == 0 ? std::string(presets()[r.idx].name) : userPresets[r.idx]);
+            fontSize(10); textLetterSpacing(0.2f); textAlign(ALIGN_LEFT | ALIGN_MIDDLE); fillColor(hot || isCur || del ? C_TEXT : C_DIM);
+            const std::string label = del ? "Delete? click again" : itemLabel(r);
             text(r.x + 12, r.y + r.h / 2 + 0.5f, label.c_str(), nullptr);
+            // the favourite star
+            const bool fav = isFav(key);
+            if (fav || hot) drawStar(r.x + r.w - 10, r.y + r.h / 2, 5.f, fav);
         }
+    }
+    void drawStar(float cx, float cy, float rr, bool filled) {
+        beginPath();
+        for (int k = 0; k < 10; ++k) { const float a = -3.14159265f / 2 + k * 3.14159265f / 5, q = k % 2 ? rr * 0.45f : rr; if (!k) moveTo(cx + q * std::cos(a), cy + q * std::sin(a)); else lineTo(cx + q * std::cos(a), cy + q * std::sin(a)); }
+        closePath();
+        if (filled) { fillColor(C_FAV); fill(); } else { strokeColor(C_DIM); strokeWidth(1); stroke(); }
     }
     int menuHit(float x, float y) const { float mx, my, mw, mh; std::vector<MRect> it; menuLayout(mx, my, mw, mh, it);
         for (int i = 0; i < (int)it.size(); ++i) if (x >= it[i].x && x < it[i].x + it[i].w && y >= it[i].y && y < it[i].y + it[i].h) return i;
         return -1; }
     MRect menuItem(int i) const { float mx, my, mw, mh; std::vector<MRect> it; menuLayout(mx, my, mw, mh, it); return it[i]; }
+    void openMenu() { userPresets = listUserPresets(); favs = loadFavourites(); query.clear(); menuOpen = true; menuHover = -1; pendingDelete = -1; repaint(); }
+    void applyFavourite(int idx) {
+        if (idx >= (int)favs.size()) return;
+        const std::string& k = favs[idx];
+        if (k.compare(0, 2, "f:") == 0) { for (uint32_t i = 0; i < kNumPresets; ++i) if (k.substr(2) == presets()[i].name) { applyFactory((int)i); return; } }
+        else applyUser(k.substr(2));
+    }
     void drawSaveBox() {
         const float w = 360, h = 96, x = W / 2 - w / 2, y = 150;
         beginPath(); rect(0, 0, W, H); fillColor(Color(0, 0, 0, 0.45f)); fill();
         beginPath(); roundedRect(x, y, w, h, 8); fillColor(C_PANEL_HI); fill(); strokeColor(C_ACC); strokeWidth(1); stroke();
-        const char* t = savingComp ? (savingCompKind == kCompXlfo ? "SAVE LFO PRESET AS" : (savingCompKind == kCompEg ? "SAVE ENVELOPE PRESET AS" : "SAVE FOLLOWER PRESET AS")) : "SAVE PRESET AS";
+        const char* t = savingComp ? (savingCompKind == kCompXlfo ? "SAVE LFO PRESET AS" : (savingCompKind == kCompEg ? "SAVE ENVELOPE PRESET AS" : (savingCompKind == kCompEf ? "SAVE FOLLOWER PRESET AS" : "SAVE ARPEGGIATOR PRESET AS"))) : "SAVE PRESET AS";
         fontSize(9.5f); textLetterSpacing(2.f); textAlign(ALIGN_LEFT | ALIGN_TOP); fillColor(C_DIM); text(x + 16, y + 14, t, nullptr);
         beginPath(); roundedRect(x + 16, y + 36, w - 32, 26, 4); fillColor(C_DISPLAY); fill(); strokeColor(C_LINE); stroke();
         fontSize(13); textLetterSpacing(0.4f); textAlign(ALIGN_LEFT | ALIGN_MIDDLE); fillColor(C_TEXT); text(x + 26, y + 49.5f, (saveName + "|").c_str(), nullptr);
@@ -1445,6 +1509,7 @@ protected:
     int ringBtnHit(float x, float y) const { for (int pr = 0; pr < 2; ++pr) if (ringHit(pr, x, y)) return pr; return -1; }
     int areaHit(float x, float y) const {
         if (compHit(x, y)) return kTipCompPresets;
+        if (arpCompHit(x, y)) return kTipArpPresets;
         if (inDisplay(x, y)) return handleHit(x, y) >= 0 ? kTipHandle : kTipDisplay;
         if (filterTabHit(x, y) >= 0) return kTipFilterTab;
         if (stepHit(x, y)) return kTipStepEdit;
@@ -1488,6 +1553,13 @@ protected:
     bool onKeyboard(const KeyboardEvent& ev) override {
         if (!ev.press) return false;
         std::string* buf = saving ? &saveName : (editing >= 0 ? &editBuf : nullptr);
+        if (!buf && menuOpen) {                              // typing in the preset browser searches
+            if (ev.key == kKeyEscape) { if (!query.empty()) query.clear(); else menuOpen = false; }
+            else if (ev.key == kKeyBackspace || ev.key == kKeyDelete) { if (!query.empty()) query.pop_back(); }
+            else if (ev.key >= 32 && ev.key < 127 && query.size() < 32) query += (char)ev.key;
+            else return false;
+            menuHover = -1; pendingDelete = -1; repaint(); return true;
+        }
         if (!buf) {
             const bool cmd = (ev.mod & (kModifierControl | kModifierSuper)) != 0;
             if (cmd && (ev.key == 'z' || ev.key == 'Z')) { if (ev.mod & kModifierShift) redo(); else undo(); return true; }
@@ -1497,7 +1569,7 @@ protected:
         }
         if (ev.key == kKeyEnter) {
             if (saving && savingComp) {
-                float fv[em::kXlfoFields]; for (int f = 0; f < compFieldCount(savingCompKind); ++f) fv[f] = val[compParam(savingCompKind, savingCompIdx, f)];
+                float fv[em::kXlfoFields + kArpCompFields]; for (int f = 0; f < compFieldCount(savingCompKind); ++f) fv[f] = val[compParam(savingCompKind, savingCompIdx, f)];
                 if (saveCompPreset(savingCompKind, saveName, fv)) { saving = savingComp = false; saveError = false; flash("Saved " + sanitizeName(saveName)); } else saveError = true;
             } else if (saving) {
                 if (saveUserPreset(saveName, val)) { userPresets = listUserPresets(); curUser = sanitizeName(saveName); curFactory = -1; std::copy(val, val + kParamCount, userVals); saving = false; saveError = false; }
@@ -1563,11 +1635,14 @@ protected:
         }
         if (menuOpen) {
             const int m = menuHit(x, y);
-            if (m >= 0) { const MRect r = menuItem(m);
+            if (m >= 0) {
+                const MRect r = menuItem(m);
+                if (r.kind == 3) return true;                       // the search field: just type
+                if ((r.kind == 0 || r.kind == 1 || r.kind == 4) && x >= r.x + r.w - 20) { toggleFav(favKey(r.kind, r.idx)); return true; }
                 if (r.kind == 2) { menuOpen = false; saving = true; savingComp = false; saveError = false; saveName = curUser; }
                 else if (r.kind == 1 && pendingDelete == r.idx) { deleteUserPreset(userPresets[r.idx]); if (curUser == userPresets[r.idx]) curUser.clear(); userPresets = listUserPresets(); pendingDelete = -1; repaint(); return true; }
-                else { menuOpen = false; if (r.kind == 0) applyFactory(r.idx); else applyUser(userPresets[r.idx]); } }
-            else menuOpen = false;
+                else { menuOpen = false; if (r.kind == 0) applyFactory(r.idx); else if (r.kind == 1) applyUser(userPresets[r.idx]); else applyFavourite(r.idx); }
+            } else menuOpen = false;
             pendingDelete = -1; menuHover = -1; repaint(); return true;
         }
         const int hh = headerHit(x, y);
@@ -1581,7 +1656,7 @@ protected:
         const int pb = presetBarHit(x, y);
         if (pb == 0) { step(-1); return true; }
         if (pb == 2) { step(1); return true; }
-        if (pb == 1) { userPresets = listUserPresets(); menuOpen = true; menuHover = -1; pendingDelete = -1; repaint(); return true; }
+        if (pb == 1) { openMenu(); return true; }
         if (clearHit(x, y)) { setState("cmd", "clear"); for (int& m : paramCC) m = -1; flash("All MIDI assignments cleared"); return true; }
         { const int rb = ringBtnHit(x, y); if (rb >= 0) { const uint32_t p = rb ? kRing34 : kRing12; if (learnMode) { learn(p); return true; } beginGesture(); commit(p, val[p] > 0.5f ? 0.f : 1.f); endGesture(); return true; } }
         { bool dot = false; const int ft = filterTabHit(x, y, &dot);
@@ -1591,7 +1666,8 @@ protected:
         const int tb = tabHit(x, y); if (tb >= 0) { tab = tb; repaint(); return true; }
         { const int u = fxUnitHit(x, y); if (u >= 0) { selFx = u; repaint(); return true; } }
         if (!learnMode) {
-            if (compHit(x, y)) { openCompMenu(); return true; }
+            if (compHit(x, y)) { openCompMenu(false); return true; }
+            if (arpCompHit(x, y)) { openCompMenu(true); return true; }
             const int ch = chipHit(x, y); if (ch > 0) { dragSrc = ch; dragPX = x; dragPY = y; repaint(); return true; }
             if (styleHit(x, y)) { popup.open = true; popup.kind = 0; popup.slot = -1; popup.x = STYLE_X; popup.y = STYLE_Y + 28; popup.hover = -1; repaint(); return true; }
             const int part = slotPartHit(x, y); if (part >= 0) { rowClick(part, x, y, ev.mod); return true; }
@@ -1686,6 +1762,7 @@ protected:
         const int tb = tabHit(x, y); if (tb != hoverTab) { hoverTab = tb; repaint(); }
         const int ch = chipHit(x, y); if (ch != hoverChip) { hoverChip = ch; repaint(); }
         const bool hcp = compHit(x, y); if (hcp != hoverComp) { hoverComp = hcp; repaint(); }
+        const bool hap = arpCompHit(x, y); if (hap != hoverArpComp) { hoverArpComp = hap; repaint(); }
         const bool hs = styleHit(x, y); if (hs != hoverStyle) { hoverStyle = hs; repaint(); }
         const int hd = inDisplay(x, y) ? handleHit(x, y) : -1; if (hd != hoverHandle) { hoverHandle = hd; repaint(); }
         const bool hdisp = inDisplay(x, y); if (hdisp != hoverDisplay) { hoverDisplay = hdisp; repaint(); }
@@ -1861,11 +1938,11 @@ private:
     bool hoverDisplay = false;
     int dragSrc = -1, hoverChip = -1; float dragPX = 0, dragPY = 0;
     int selSlot = -1, slotScroll = 0, hoverSlotPart = -1, activeRow = -1;
-    bool hoverStyle = false, hoverComp = false, dragStep = false, dragXy = false;
+    bool hoverStyle = false, hoverComp = false, hoverArpComp = false, dragStep = false, dragXy = false;
     std::vector<Snap> undoStack, redoStack; Snap abStore[2]; int abSlot = 0;
     std::string editBuf, statusText; double flashUntil = 0;
     int curFactory = 0, presetHover = -1, menuHover = -1, pendingDelete = -1, hoverHeader = 0;
-    std::string curUser; std::vector<std::string> userPresets;
+    std::string curUser, query; std::vector<std::string> userPresets, favs;
     bool menuOpen = false, saving = false, saveError = false; std::string saveName;
     bool learnMode = false, hoverClear = false; int learnWaiting = -1; float lastLearnEcho = 0;
     int tipKey = -1, tipSuppressed = -2; double tipSince = 0; bool tipShown = false; float tipX = 0, tipY = 0;

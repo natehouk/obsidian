@@ -190,13 +190,13 @@ inline const char* paramTip(uint32_t p) {
 enum TipTarget { kTipUndo, kTipRedo, kTipLearn, kTipMidi, kTipHelp, kTipA, kTipB, kTipCopy, kTipPrev, kTipPresets, kTipNext,
                  kTipChip, kTipSlotDel, kTipFilter, kTipEnv, kTipLfo,
                  kTipDisplay, kTipHandle, kTipFilterTab, kTipStepEdit, kTipXyPad, kTipSourceTab, kTipCompPresets, kTipModRing,
-                 kTipClassicChip, kTipClassicRow, kTipFxUnit, kTipOscWave, kTipArpView, kTipEgCurve, kNumTipTargets };
+                 kTipClassicChip, kTipClassicRow, kTipFxUnit, kTipOscWave, kTipArpView, kTipEgCurve, kTipArpPresets, kNumTipTargets };
 inline const char* targetTitle(int t) {
     static const char* const n[kNumTipTargets] = { "Undo", "Redo", "MIDI Learn", "MIDI", "Help", "Setting A", "Setting B", "Copy A/B",
                                                    "Previous preset", "Presets", "Next preset", "Modulation source", "Remove slot",
                                                    "Filter response", "Envelope", "LFO",
                                                    "Filter display", "Filter handle", "Filter", "Step sequence", "XY pad", "Modulation sources", "Source presets", "Modulated",
-                                                   "Classic source", "Classic modulation", "Effect", "Waveform", "Arpeggiator", "Envelope curve" };
+                                                   "Classic source", "Classic modulation", "Effect", "Waveform", "Arpeggiator", "Envelope curve", "Arpeggiator presets" };
     return n[t];
 }
 inline const char* targetTip(int t) {
@@ -209,7 +209,7 @@ inline const char* targetTip(int t) {
     case kTipA: case kTipB: return "Obsidian keeps two complete sounds, A and B. Click the other letter to switch and compare.";
     case kTipCopy: return "Copies the current sound to the other slot.";
     case kTipPrev: return "Load the previous preset. The mouse wheel over the preset name also steps through presets.";
-    case kTipPresets: return "Open the preset browser: factory sounds in eight categories, your own sounds, and SAVE CURRENT AS. A * after the name means you have changed it.";
+    case kTipPresets: return "Open the preset browser: factory sounds in eight categories, your own sounds and your favourites. Type to search names and categories; click a star to keep a preset in Favourites. A * after the name means you have changed it.";
     case kTipNext: return "Load the next preset.";
     case kTipChip: return "Drag this source onto any knob to modulate it. A slot is created with a starting amount, and the knob gets a coloured ring.";
     case kTipSlotDel: return "Removes this modulation slot.";
@@ -222,6 +222,7 @@ inline const char* targetTip(int t) {
     case kTipStepEdit: return "Draw the sequence: click or drag up and down across the steps. Cmd/Ctrl-click resets a step to zero.";
     case kTipXyPad: return "Drag the dot. X and Y are separate modulation sources; drag their chips onto knobs.";
     case kTipSourceTab: return "Choose a modulation source to edit: four XLFOs (wave or step sequencer), two envelopes with curves, two envelope followers, two XY pads, the MIDI sources, and Obsidian 2's classic LFOs and envelopes.";
+    case kTipArpPresets: return "Presets for just the arpeggiator: load a ready-made pattern (order, octaves, note length, groove, latch) without touching the sound, or save your own. Right-click a saved one to delete it.";
     case kTipCompPresets: return "Presets for just this source: load a ready-made LFO shape, sequence, envelope or follower setting without touching the rest of the sound, or save your own. Right-click a saved one to delete it.";
     case kTipModRing: return "This knob is modulated. Click the ring (or right-click the knob) to list every slot that moves it, with its amount, bypass and delete.";
     case kTipClassicChip: return "A classic source from Obsidian 2. Drag it onto a knob Obsidian 2 could modulate; it makes a classic slot (up to 24). For everything else, use the XLFOs, EGs and followers.";
@@ -253,7 +254,7 @@ static const HelpPage kHelpPages[] = {
     { "Effects",
       "Reverb, delay, chorus, phaser/flanger, drive and compressor, in that order (drive can also go first). Each has a switch and an AMOUNT knob; click its name to edit the rest on the right. Every effect knob can be modulated." },
     { "Arpeggiator",
-      "Switch it on and hold a chord. ORDER: up, down, up/down, as played, random; OCTAVES adds higher octaves. Free RATE, or SYNC to the tempo with a NOTE length and an OFFSET. GROOVE shuffles every second note, LEGATO sets the note length. LATCH keeps the pattern going after you let go. LOCK keeps the arpeggiator when you change presets." },
+      "Switch it on and hold a chord. ORDER: up, down, up/down, as played, random; OCTAVES adds higher octaves. Free RATE, or SYNC to the tempo with a NOTE length and an OFFSET. GROOVE shuffles every second note, LEGATO sets the note length. LATCH keeps the pattern going after you let go. LOCK keeps the arpeggiator when you change presets; PRESETS loads or saves just the arpeggiator." },
     { "Modulation",
       "Sources: four XLFOs (wave or 16-step sequencer, per note or shared), two EGs with curves, two envelope followers, two XY pads, the MIDI sources, and Obsidian 2's classic LFOs and envelopes. Every source runs per voice.\n\n"
       "Drag a chip onto any knob: the knob gets a coloured ring, and the slot appears in the list (100 slots, plus 24 classic). Right-click a knob to list what moves it. A slot's amount is itself a destination." },
@@ -263,6 +264,7 @@ static const HelpPage kHelpPages[] = {
     { "MIDI & shortcuts",
       "MIDI LEARN: click LEARN, click a control, move a controller. Right-click unassigns. The MIDI button switches all MIDI input off.\n\n"
       "A/B holds two complete sounds; COPY copies the current one to the other slot. Every edit is an undo step (Cmd/Ctrl-Z, Cmd/Ctrl-Shift-Z).\n\n"
+      "PRESETS: in the browser, type to search names and categories; click a star to add a preset to Favourites.\n\n"
       "Double-click a knob to type a value; Cmd/Ctrl-click resets it; Shift-drag is fine adjustment. Esc closes this window." },
 };
 static constexpr int kNumHelpPages = sizeof(kHelpPages) / sizeof(kHelpPages[0]);

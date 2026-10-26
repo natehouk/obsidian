@@ -55,7 +55,7 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/*/Obsidian*
 
 **Effects:** reverb (0.2–20 s, brightness, predelay), delay (free or synced, stereo offset, feedback, ping-pong, low and high cut), chorus (single or double), phaser / flanger, drive (pre or post) and a compressor (threshold, ratio, attack, release, auto gain, parallel amount).
 
-**Arpeggiator:** up, down, up/down, as played or random; up to 3 extra octaves; free rate (0.25–20 Hz) or synced with a ×0.5–×2 offset; groove; legato (note length); latch off / held / full; retrigger; and **lock**, which keeps the arpeggiator when you change presets.
+**Arpeggiator:** up, down, up/down, as played or random; up to 3 extra octaves; free rate (0.25–20 Hz) or synced with a ×0.5–×2 offset; groove; legato (note length); latch off / held / full; retrigger; **lock**, which keeps the arpeggiator when you change presets; and its own section presets.
 
 **Voices**
 - Up to **64 voices**, **unison** up to 8 with detune and stereo spread.
@@ -82,7 +82,7 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/*/Obsidian*
 
   Assignments are saved with your project.
 - **MIDI** switch: turns all MIDI handling off.
-- **60 factory presets** in eight categories: Bass, Lead, Pad, Keys & Plucks, Brass & Strings, FX & Motion, Arp & Sequence and Texture.
+- **60 factory presets** in eight categories: Bass, Lead, Pad, Keys & Plucks, Brass & Strings, FX & Motion, Arp & Sequence and Texture. The browser **searches** names and categories as you type, and a star keeps a preset in **Favourites**.
 - **Save your own presets** as small text files, which load the same on every OS:
   - macOS: `~/Library/Audio/Presets/Epsilon Audio/Obsidian/`
   - Windows: `%APPDATA%\Epsilon Audio\Obsidian\Presets\`
@@ -107,11 +107,12 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/*/Obsidian*
 | Serial, parallel and per-oscillator filter routing; freq/peak offsets | ✓ |
 | HQ (oversampling) mode | ✓ 4× |
 | Reverb, delay, chorus, phaser/flanger, drive, compressor | ✓ |
-| Arpeggiator: order, octaves, rate/sync, groove, legato, latch, retrigger, lock | ✓ |
+| Arpeggiator: order, octaves, rate/sync, groove, legato, latch, retrigger, lock, section presets | ✓ |
 | Up to 64 voices, unison, per-oscillator voice mode | ✓ |
 | XLFOs (step sequencer), EGs with curves, EFs, XY controllers, MIDI sources | ✓ 4 XLFOs, 2 EGs, 2 EFs (with transient mode), 2 XY pads, MIDI |
 | Drag-and-drop modulation with visual feedback, up to 100 slots | ✓ 100 slots plus Obsidian 2's 24, live rings, per-knob slot list |
 | MIDI Learn, undo/redo, A/B, help and interactive hints | ✓ |
+| Preset browser | ✓ categories, search, favourites, user presets |
 | Factory presets; loads earlier presets | 60, plus your own; loads Obsidian 1.x and 2.x projects and presets, sounding identical |
 | Resizable interface, full-screen mode | Freely resizable interface |
 | AAX, AudioSuite | Not supported (needs Avid's SDK and signing) |
@@ -181,7 +182,7 @@ New parameters are only ever appended, so saved sessions and automation keep wor
 
 ## Changelog
 
-- **3.0:** Four oscillators with sine, white and pink noise, a sync-ratio knob, ring modulation, drift, master tune and transpose; four filters with seven new styles, bell, shelf and notch shapes, 6 and 48 dB slopes, gain, per-oscillator routing, freq/peak offsets and an interactive display; 4× HQ mode; reverb, delay, chorus, phaser/flanger, drive and compressor; an arpeggiator; up to 64 voices, unison 8 and a per-oscillator voice mode; the Epsilon modulation system (4 XLFOs with step sequencers, 2 curved envelopes, 2 followers, 2 XY pads, MIDI sources, 100 slots, per-source presets); a new interface; 18 new factory presets. Sessions and presets from 1.x and 2.x load unchanged and sound identical.
+- **3.0:** Four oscillators with sine, white and pink noise, a sync-ratio knob, ring modulation, drift, master tune and transpose; four filters with seven new styles, bell, shelf and notch shapes, 6 and 48 dB slopes, gain, per-oscillator routing, freq/peak offsets and an interactive display; 4× HQ mode; reverb, delay, chorus, phaser/flanger, drive and compressor; an arpeggiator; up to 64 voices, unison 8 and a per-oscillator voice mode; the Epsilon modulation system (4 XLFOs with step sequencers, 2 curved envelopes, 2 followers, 2 XY pads, MIDI sources, 100 slots, per-source presets); a new interface; a preset browser with search and favourites; arpeggiator presets; 18 new factory presets. Sessions and presets from 1.x and 2.x load unchanged and sound identical.
 - **2.0:** A/B with copy, undo/redo, hover tips, a help window and a full manual (in every release zip), rim-grab turning on the large knobs. Sessions and automation from 1.x load unchanged.
 - **1.0:** First release.
 

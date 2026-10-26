@@ -203,6 +203,8 @@ Switch the arpeggiator **ON** and hold a chord: it plays the notes one at a time
 
 The display shows the pattern, with the note that is playing lit up.
 
+**PRESETS** (next to the title) loads a ready-made arpeggio (order, octaves, note length, groove, latch and rate) without touching the sound, or saves your own.
+
 ---
 
 ## 9. Modulation sources
@@ -315,6 +317,8 @@ There are 60 factory sounds in eight groups, plus your own:
 **Browsing**
 - Click the preset name to open the browser.
 - **◀ ▶**, or the mouse wheel over the name, step through factory and user presets.
+- **Search:** with the browser open, just type: the list narrows to presets whose name or category matches. Backspace edits, Esc clears the search (and then closes the browser).
+- **Favourites:** click the star at the right of any preset to add it to the FAVOURITES column; click again to remove it. Favourites are kept in `favourites.txt` in your presets folder.
 - A `*` after the name means you have changed the sound since loading it.
 - With the arpeggiator's **LOCK** on, presets load without changing the arpeggiator.
 
@@ -326,7 +330,7 @@ There are 60 factory sounds in eight groups, plus your own:
 - Preset files are plain text and work on every system. Presets saved in Obsidian 2 load unchanged.
 - To delete one, right-click it in the browser and click again to confirm.
 
-**Source presets.** The **LFO PRESETS**, **EG PRESETS** and **EF PRESETS** menus on the XLFO, EG and EF tabs load and save a single source's settings, so a favourite shape or envelope can be reused in any sound. They are stored in `LFO`, `Envelope` and `Follower` folders inside your presets folder.
+**Section presets.** The **LFO PRESETS**, **EG PRESETS** and **EF PRESETS** menus on the XLFO, EG and EF tabs, and **PRESETS** in the arpeggiator, load and save just that section's settings, so a favourite shape, envelope or pattern can be reused in any sound. They are stored in `LFO`, `Envelope`, `Follower` and `Arpeggiator` folders inside your presets folder.
 
 ![Presets](../screenshot-presets.png)
 

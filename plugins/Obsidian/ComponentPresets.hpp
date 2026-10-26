@@ -1,23 +1,31 @@
-// Presets for a single modulation source (an XLFO, an envelope generator or an envelope follower):
+// Presets for a single section (an XLFO, an envelope generator, an envelope follower or the arpeggiator):
 // a factory list per kind plus user files, each holding only that source's fields. License: MIT.
 #pragma once
 #include "UserPresets.hpp"
 
 namespace obsidian {
 
-enum CompKind { kCompXlfo, kCompEg, kCompEf, kNumCompKinds };
+enum CompKind { kCompXlfo, kCompEg, kCompEf, kCompArp, kNumCompKinds };
+// arpeggiator section presets hold Rate .. Retrigger (not On or Lock)
+static constexpr int kArpCompFields = (int)(kArpRetrig - kArpRate + 1);
+inline em::FieldRange arpCompRange(int f) {
+    static const float def[kArpCompFields] = { 8, 1, 4, 1, 0, 0, 0, 0.6f, 0, 0 };
+    const uint32_t p = kArpRate + (uint32_t)f; const ParamDef& d = paramDef(p);
+    const em::FieldRange r = { d.min, d.max, def[f], (d.hints & kHintLog) != 0, (d.hints & (kHintInteger | kHintBoolean)) != 0 };
+    return r;
+}
 
-inline int compFieldCount(int kind) { return kind == kCompXlfo ? (int)em::kXlfoFields : (kind == kCompEg ? (int)em::kEgFields : (int)em::kEfFields); }
+inline int compFieldCount(int kind) { return kind == kCompXlfo ? (int)em::kXlfoFields : (kind == kCompEg ? (int)em::kEgFields : (kind == kCompEf ? (int)em::kEfFields : kArpCompFields)); }
 inline uint32_t compParam(int kind, int index, int field) {
-    return kind == kCompXlfo ? lp_(index, field) : (kind == kCompEg ? ep(index, field) : fp(index, field));
+    return kind == kCompXlfo ? lp_(index, field) : (kind == kCompEg ? ep(index, field) : (kind == kCompEf ? fp(index, field) : kArpRate + (uint32_t)field));
 }
 // the symbol of a field without its instance prefix ("l1rate" -> "rate", "eg2a" -> "a")
 inline std::string compFieldSym(int kind, int field) {
     const std::string s = paramDef(compParam(kind, 0, field)).sym;
-    return s.substr(kind == kCompEf ? 3 : 2);     // "x1rate", "e1a", "ef1a"
+    return s.substr(kind == kCompEf || kind == kCompArp ? 3 : 2);     // "x1rate", "e1a", "ef1a", "arprate"
 }
-inline em::FieldRange compRange(int kind, int field) { return kind == kCompXlfo ? em::xlfoRange(field) : (kind == kCompEg ? em::egRange(field) : em::efRange(field)); }
-inline const char* compKindName(int kind) { static const char* const n[kNumCompKinds] = { "LFO", "Envelope", "Follower" }; return n[kind]; }
+inline em::FieldRange compRange(int kind, int field) { return kind == kCompXlfo ? em::xlfoRange(field) : (kind == kCompEg ? em::egRange(field) : (kind == kCompEf ? em::efRange(field) : arpCompRange(field))); }
+inline const char* compKindName(int kind) { static const char* const n[kNumCompKinds] = { "LFO", "Envelope", "Follower", "Arpeggiator" }; return n[kind]; }
 
 struct CompPreset { const char* name; int kind; std::vector<std::pair<int, float>> set; };
 
@@ -63,6 +71,17 @@ inline const std::vector<CompPreset>& compFactory() {
         F("Hot Follow", { { em::kFAttack, 0.005f }, { em::kFRelease, 0.15f }, { em::kFGain, 12 } });
         F("Synth Fast", { { em::kFSource, 1 }, { em::kFAttack, 0.002f }, { em::kFRelease, 0.2f }, { em::kFGain, 6 } });
         F("Synth Smooth", { { em::kFSource, 1 }, { em::kFAttack, 0.03f }, { em::kFRelease, 0.5f } });
+        // arpeggiator: fields are offsets from kArpRate. Note (div): 0 1/4, 1 1/8, 2 1/8 dot, 3 1/8 trip, 4 1/16, 5 1/16 dot, 6 1/16 trip, 7 1/32, 8 1/2
+        auto A = [&](const char* n, std::vector<std::pair<int, float>> s) { for (auto& kv : s) kv.first -= (int)kArpRate; v.push_back({ n, kCompArp, s }); };
+        A("Up 1/16", { { kArpDiv, 4 }, { kArpOrder, kArpUp } });
+        A("Up/Down 2 Oct", { { kArpDiv, 4 }, { kArpOrder, kArpUpDown }, { kArpOctaves, 2 } });
+        A("Down 1/8", { { kArpDiv, 1 }, { kArpOrder, kArpDown }, { kArpGate, 0.8f } });
+        A("As Played Triplets", { { kArpDiv, 6 }, { kArpOrder, kArpPlayed } });
+        A("Random 1/16", { { kArpDiv, 4 }, { kArpOrder, kArpRandom }, { kArpOctaves, 1 }, { kArpGate, 0.4f } });
+        A("Swing 1/16", { { kArpDiv, 4 }, { kArpOrder, kArpUp }, { kArpGroove, 0.35f }, { kArpOctaves, 1 } });
+        A("Staccato 1/32", { { kArpDiv, 7 }, { kArpOrder, kArpUp }, { kArpGate, 0.15f }, { kArpOctaves, 1 } });
+        A("Held Chords", { { kArpDiv, 4 }, { kArpOrder, kArpUpDown }, { kArpLatch, kLatchHeld }, { kArpRetrig, 1 } });
+        A("Free 6 Hz", { { kArpSync, 0 }, { kArpRate, 6 }, { kArpOrder, kArpUp }, { kArpOctaves, 1 } });
         return v;
     }();
     return p;
