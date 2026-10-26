@@ -554,7 +554,7 @@ protected:
         beginPath(); moveTo(26, 17); lineTo(33, 46); lineTo(21, 42); closePath(); fillColor(withAlpha(C_BG, 0.35f)); fill();
         fontSize(22); textLetterSpacing(9); fillColor(C_TEXT); textAlign(ALIGN_LEFT | ALIGN_MIDDLE); text(50, 32, "OBSIDIAN", nullptr);
         fontSize(9.5f); textLetterSpacing(2.5f); fillColor(C_DIM); text(256, 27, "POLYPHONIC SYNTHESIZER", nullptr);
-        char vb[48]; snprintf(vb, sizeof vb, "EPSILON AUDIO 3.0   ·   %d VOICES", liveVoices);
+        char vb[48]; snprintf(vb, sizeof vb, "EPSILON AUDIO 3.1   ·   %d VOICES", liveVoices);
         fontSize(7); textLetterSpacing(1.1f); fillColor(C_FAINT); text(256, 39, vb, nullptr);
         drawPresetBar();
         for (int k = 0; k < 2; ++k) {

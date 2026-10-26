@@ -182,7 +182,8 @@ New parameters are only ever appended, so saved sessions and automation keep wor
 
 ## Changelog
 
-- **3.0:** Four oscillators with sine, white and pink noise, a sync-ratio knob, ring modulation, drift, master tune and transpose; four filters with seven new styles, bell, shelf and notch shapes, 6 and 48 dB slopes, gain, per-oscillator routing, freq/peak offsets and an interactive display; 4× HQ mode; reverb, delay, chorus, phaser/flanger, drive and compressor; an arpeggiator; up to 64 voices, unison 8 and a per-oscillator voice mode; the Epsilon modulation system (4 XLFOs with step sequencers, 2 curved envelopes, 2 followers, 2 XY pads, MIDI sources, 100 slots, per-source presets); a new interface; a preset browser with search and favourites; arpeggiator presets; 18 new factory presets. Sessions and presets from 1.x and 2.x load unchanged and sound identical.
+- **3.1:** arpeggiator presets (as in Twin 3); the preset browser searches names and categories as you type, and keeps Favourites.
+- **3.0:** Four oscillators with sine, white and pink noise, a sync-ratio knob, ring modulation, drift, master tune and transpose; four filters with seven new styles, bell, shelf and notch shapes, 6 and 48 dB slopes, gain, per-oscillator routing, freq/peak offsets and an interactive display; 4× HQ mode; reverb, delay, chorus, phaser/flanger, drive and compressor; an arpeggiator; up to 64 voices, unison 8 and a per-oscillator voice mode; the Epsilon modulation system (4 XLFOs with step sequencers, 2 curved envelopes, 2 followers, 2 XY pads, MIDI sources, 100 slots, per-source presets); a new interface; 18 new factory presets. Sessions and presets from 1.x and 2.x load unchanged and sound identical.
 - **2.0:** A/B with copy, undo/redo, hover tips, a help window and a full manual (in every release zip), rim-grab turning on the large knobs. Sessions and automation from 1.x load unchanged.
 - **1.0:** First release.
 

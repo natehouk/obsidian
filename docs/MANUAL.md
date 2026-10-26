@@ -1,4 +1,4 @@
-# Obsidian 3.0 — User Manual
+# Obsidian 3.1 — User Manual
 
 Obsidian is a polyphonic synthesizer. It has:
 
